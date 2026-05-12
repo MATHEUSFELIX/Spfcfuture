@@ -107,3 +107,15 @@ A fase de piloto é a validação final do sistema em condições próximas ao u
 
 **Exemplos de testes:**
 *   `test_pilot_report_generated`: Garante que o relatório de piloto é gerado contendo métricas de qualidade e o feedback consolidado.
+
+## 11. Opponent Preparation
+
+Esta categoria valida os módulos de preparação contra adversários, assegurando que o perfil de pressing, as vulnerabilidades e a análise de bola parada sejam processados corretamente, e que o plano de jogo pré-partida siga as diretrizes táticas do clube.
+
+A preparação de adversário é crítica para a estratégia de jogo. Se o sistema não identificar corretamente as ameaças ou gerar planos de jogo genéricos que ignoram os princípios inegociáveis do clube, as recomendações perderão valor prático para a comissão técnica.
+
+**Exemplos de testes:**
+*   `test_demo_opp_001_high_pressing`: Garante que a análise detecta corretamente o pressing alto e as zonas de vulnerabilidade.
+*   `test_plan_has_5_sections_with_principles`: Garante que o plano de jogo incorpora os princípios inegociáveis do clube como uma seção dedicada.
+*   `test_disclaimer_always_present`: Garante que o plano de jogo pré-partida sempre inclui um aviso claro de que a decisão final é humana.
+*   `test_api_opponent_plan_returns_200`: Garante que a API de plano de jogo retorna a estrutura correta em formato JSON para integração com outros sistemas.

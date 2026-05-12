@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Adversários — SPFC Decision OS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Preparação de Adversários</h1>
+  <p class="subtitle">Análise de perfil, pressing, zonas de vulnerabilidade e plano de jogo pré-partida.</p>
+</div>
+
+{% if demo_notice %}
+<div class="alert alert-info">
+  <strong>Dados de Demonstração:</strong> Os adversários exibidos são fixtures fictícias criadas para demonstração do sistema.
+  Nenhum dado representa análise real de qualquer clube.
+</div>
+{% endif %}
+
+<!-- Resumo -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value">{{ opponents | length }}</div>
+    <div class="stat-label">Adversários Analisados</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ critical_count }}</div>
+    <div class="stat-label">Ameaça Crítica/Alta</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ total_alerts }}</div>
+    <div class="stat-label">Alertas Táticos</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ total_vulnerabilities }}</div>
+    <div class="stat-label">Vulnerabilidades</div>
+  </div>
+</div>
+
+<!-- Lista de Adversários -->
+<section class="section">
+  <h2>Adversários Disponíveis</h2>
+  {% if opponents %}
+  <div class="opponents-grid">
+    {% for item in opponents %}
+    <div class="opponent-card threat-{{ item.report.overall_threat_level }}">
+      <div class="opponent-card-header">
+        <h3>{{ item.name }}</h3>
+        <span class="badge badge-threat-{{ item.report.overall_threat_level }}">
+          Ameaça: {{ item.report.overall_threat_level | upper }}
+        </span>
+      </div>
+      <p class="opponent-description">{{ item.description }}</p>
+
+      <div class="opponent-meta">
+        <div class="meta-item">
+          <span class="meta-label">Formação</span>
+          <span class="meta-value">{{ item.report.formation_summary }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Pressing</span>
+          <span class="meta-value pressing-{{ item.report.pressing_analysis.intensity }}">
+            {{ item.report.pressing_analysis.intensity | upper }}
+          </span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Partidas Analisadas</span>
+          <span class="meta-value">{{ item.report.source_matches_count }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Completude dos Dados</span>
+          <span class="meta-value">{{ (item.report.data_completeness * 100) | int }}%</span>
+        </div>
+      </div>
+
+      <!-- Alertas táticos -->
+      {% if item.report.tactical_alerts %}
+      <div class="opponent-alerts">
+        <strong>Alertas:</strong>
+        {% for alert in item.report.tactical_alerts[:2] %}
+        <span class="badge badge-alert-{{ alert.severity }}">{{ alert.title }}</span>
+        {% endfor %}
+        {% if item.report.tactical_alerts | length > 2 %}
+        <span class="badge badge-neutral">+{{ item.report.tactical_alerts | length - 2 }} mais</span>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- Vulnerabilidades de zona -->
+      {% if item.report.zone_vulnerabilities %}
+      <div class="zone-pills">
+        {% for zone in item.report.zone_vulnerabilities %}
+        <span class="zone-pill zone-{{ zone.corridor }} severity-{{ zone.severity }}">
+          {{ zone.corridor | upper }}
+        </span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="opponent-actions">
+        <a href="/opponents/{{ item.report.opponent_id }}" class="btn btn-primary">
+          Ver Análise Completa
+        </a>
+        <a href="/opponents/{{ item.report.opponent_id }}/plan" class="btn btn-secondary">
+          Ver Plano de Jogo
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>Nenhum adversário analisado ainda.</p>
+  </div>
+  {% endif %}
+</section>
+
+<!-- Legenda de Ameaça -->
+<section class="section">
+  <h2>Legenda de Nível de Ameaça</h2>
+  <div class="legend-grid">
+    <div class="legend-item">
+      <span class="badge badge-threat-critical">CRITICAL</span>
+      <span>Adversário de altíssimo risco. Máxima atenção defensiva e tática.</span>
+    </div>
+    <div class="legend-item">
+      <span class="badge badge-threat-high">HIGH</span>
+      <span>Adversário perigoso. Equilíbrio entre ataque e defesa.</span>
+    </div>
+    <div class="legend-item">
+      <span class="badge badge-threat-moderate">MODERATE</span>
+      <span>Adversário de nível médio. Explorar vulnerabilidades identificadas.</span>
+    </div>
+    <div class="legend-item">
+      <span class="badge badge-threat-low">LOW</span>
+      <span>Adversário com pontos fracos claros. Aproveitar as oportunidades.</span>
+    </div>
+    <div class="legend-item">
+      <span class="badge badge-threat-unknown">UNKNOWN</span>
+      <span>Dados insuficientes. Adaptar nos primeiros 15 minutos.</span>
+    </div>
+  </div>
+</section>
+{% endblock %}

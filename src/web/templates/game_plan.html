@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Plano de Jogo — {{ plan.opponent_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">
+    <a href="/opponents">Adversários</a> &rsaquo;
+    <a href="/opponents/{{ plan.opponent_id }}">{{ plan.opponent_name }}</a> &rsaquo;
+    Plano de Jogo
+  </div>
+  <h1>Plano de Jogo</h1>
+  <p class="subtitle">{{ plan.opponent_name }}</p>
+  <div class="header-badges">
+    <span class="badge badge-neutral">{{ plan.plan_id }}</span>
+    <span class="badge badge-neutral">Gerado: {{ plan.created_at[:10] }}</span>
+    <span class="badge badge-neutral">
+      Confiança Geral: {{ (plan.overall_confidence * 100) | int }}%
+    </span>
+    <span class="badge badge-neutral">
+      Completude dos Dados: {{ (plan.data_completeness * 100) | int }}%
+    </span>
+  </div>
+</div>
+
+{% if demo_notice %}
+<div class="alert alert-info">
+  <strong>Dados de Demonstração:</strong> Este plano é gerado a partir de dados fictícios.
+  Não representa análise real de qualquer clube ou partida.
+</div>
+{% endif %}
+
+<!-- Disclaimer -->
+<div class="alert alert-warning">
+  <strong>Aviso:</strong> {{ plan.disclaimer }}
+</div>
+
+<!-- Contexto da Partida -->
+{% if plan.match_context and plan.match_context != "Contexto da partida não especificado." %}
+<section class="section">
+  <h2>Contexto da Partida</h2>
+  <div class="match-context-box">{{ plan.match_context }}</div>
+</section>
+{% endif %}
+
+<!-- Mensagens-Chave -->
+{% if plan.key_messages %}
+<section class="section">
+  <h2>Mensagens-Chave para a Equipe</h2>
+  <div class="key-messages-list">
+    {% for msg in plan.key_messages %}
+    <div class="key-message">
+      <span class="key-message-number">{{ loop.index }}</span>
+      <span>{{ msg }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Seções do Plano -->
+<section class="section">
+  <h2>Plano por Fase de Jogo</h2>
+  <div class="plan-sections">
+    {% for section in plan.sections %}
+    <div class="plan-section priority-{{ section.priority }}">
+      <div class="plan-section-header">
+        <h3>{{ section.title }}</h3>
+        <div class="section-badges">
+          <span class="badge badge-phase-{{ section.phase }}">{{ section.phase | replace('_', ' ') | upper }}</span>
+          <span class="badge badge-priority-{{ section.priority }}">Prioridade: {{ section.priority | upper }}</span>
+          <span class="badge badge-neutral">Confiança: {{ (section.confidence * 100) | int }}%</span>
+        </div>
+      </div>
+
+      {% if section.rationale %}
+      <div class="section-rationale">
+        <strong>Justificativa:</strong> {{ section.rationale }}
+      </div>
+      {% endif %}
+
+      {% if section.instructions %}
+      <ul class="section-instructions">
+        {% for instruction in section.instructions %}
+        <li>{{ instruction }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      <div class="confidence-bar-wrap small">
+        <div class="confidence-bar">
+          <div class="confidence-fill" style="width: {{ (section.confidence * 100) | int }}%"></div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Riscos -->
+{% if plan.risk_flags %}
+<section class="section">
+  <h2>Riscos do Plano</h2>
+  <div class="risk-list">
+    {% for risk in plan.risk_flags %}
+    <div class="risk-item">
+      <span class="risk-icon">⚠</span>
+      <span>{{ risk }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Contingências -->
+{% if plan.contingency_notes %}
+<section class="section">
+  <h2>Notas de Contingência</h2>
+  <p class="section-intro">Ajustes táticos a considerar conforme o jogo evolui:</p>
+  <ul class="contingency-list">
+    {% for note in plan.contingency_notes %}
+    <li>{{ note }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<!-- Ações -->
+<div class="page-actions">
+  <a href="/opponents/{{ plan.opponent_id }}" class="btn btn-secondary">
+    Voltar para Análise
+  </a>
+  <a href="/opponents" class="btn btn-secondary">
+    Todos os Adversários
+  </a>
+</div>
+{% endblock %}

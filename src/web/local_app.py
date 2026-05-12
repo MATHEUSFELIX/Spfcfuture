@@ -25,6 +25,12 @@ from fastapi.templating import Jinja2Templates
 
 from src.core.artifact_store import ArtifactStore
 from src.core.test_catalog import get_catalog
+from src.opponent_prep.game_plan import GamePlanGenerator
+from src.opponent_prep.opponent_analyzer import OpponentAnalyzer as OppAnalyzer
+from src.opponent_prep.opponent_fixtures import (
+    build_demo_opponents,
+    get_demo_opponent_by_id,
+)
 from src.spfc_base.knowledge_base import SPFC_KNOWLEDGE_BASE
 from src.squad_intelligence.squad_analyzer import SquadAnalyzer
 from src.squad_intelligence.squad_fixtures import build_demo_squad
@@ -33,7 +39,7 @@ from src.squad_intelligence.squad_fixtures import build_demo_squad
 # Configuração do App
 # ---------------------------------------------------------------------------
 
-APP_VERSION = "0.2.0"
+APP_VERSION = "0.3.0"
 APP_TITLE = "SPFC Champion Decision OS"
 APP_DESCRIPTION = "Sistema de Apoio a Decisões Esportivas do São Paulo FC"
 
@@ -55,6 +61,8 @@ app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
 store = ArtifactStore()
 analyzer = SquadAnalyzer()
+opp_analyzer = OppAnalyzer()
+plan_generator = GamePlanGenerator()
 
 
 # ---------------------------------------------------------------------------
@@ -261,6 +269,111 @@ async def api_test_catalog() -> JSONResponse:
 
 
 # ---------------------------------------------------------------------------
+# Rotas HTML — Fase 4: Opponent Preparation
+# ---------------------------------------------------------------------------
+
+@app.get("/opponents", response_class=HTMLResponse, summary="Lista de Adversários")
+async def opponents_list(request: Request) -> HTMLResponse:
+    """
+    Lista todos os adversários analisados com resumo de ameaça,
+    pressing e vulnerabilidades.
+    """
+    raw_opponents = build_demo_opponents()
+    items = []
+    for opp in raw_opponents:
+        report = opp_analyzer.analyze(opp["profile"], opp["name"])
+        items.append({
+            "name": opp["name"],
+            "description": opp["description"],
+            "report": report,
+        })
+
+    critical_count = sum(
+        1 for i in items
+        if i["report"].overall_threat_level in ("critical", "high")
+    )
+    total_alerts = sum(len(i["report"].tactical_alerts) for i in items)
+    total_vulnerabilities = sum(
+        len(i["report"].zone_vulnerabilities) + len(i["report"].transition_vulnerabilities)
+        for i in items
+    )
+
+    return _render(
+        request,
+        "opponents.html",
+        {
+            "opponents": items,
+            "critical_count": critical_count,
+            "total_alerts": total_alerts,
+            "total_vulnerabilities": total_vulnerabilities,
+            "demo_notice": True,
+        },
+    )
+
+
+@app.get("/opponents/{opponent_id}", response_class=HTMLResponse, summary="Detalhe de Adversário")
+async def opponent_detail(request: Request, opponent_id: str) -> HTMLResponse:
+    """
+    Exibe a análise completa de um adversário: pressing, zonas de
+    vulnerabilidade, transições, bola parada e alertas táticos.
+    """
+    opp = get_demo_opponent_by_id(opponent_id)
+    if opp is None:
+        error_ctx = {
+            "error": {
+                "title": "Adversário não encontrado",
+                "cause": f"Nenhum adversário com ID '{opponent_id}' foi encontrado.",
+                "affected": "Opponent Fixtures",
+                "action": "Verifique o ID do adversário na lista de adversários.",
+            }
+        }
+        return _render(request, "error.html", error_ctx, status_code=404)
+
+    report = opp_analyzer.analyze(opp["profile"], opp["name"])
+    return _render(
+        request,
+        "opponent_detail.html",
+        {
+            "report": report,
+            "opponent_name": opp["name"],
+            "description": opp["description"],
+            "demo_notice": True,
+        },
+    )
+
+
+@app.get("/opponents/{opponent_id}/plan", response_class=HTMLResponse, summary="Plano de Jogo")
+async def opponent_game_plan(request: Request, opponent_id: str) -> HTMLResponse:
+    """
+    Gera e exibe o plano de jogo pré-partida para um adversário específico.
+    Combina a análise do adversário com os princípios táticos do SPFC.
+    """
+    opp = get_demo_opponent_by_id(opponent_id)
+    if opp is None:
+        error_ctx = {
+            "error": {
+                "title": "Adversário não encontrado",
+                "cause": f"Nenhum adversário com ID '{opponent_id}' foi encontrado.",
+                "affected": "Opponent Fixtures",
+                "action": "Verifique o ID do adversário na lista de adversários.",
+            }
+        }
+        return _render(request, "error.html", error_ctx, status_code=404)
+
+    report = opp_analyzer.analyze(opp["profile"], opp["name"])
+    principles = SPFC_KNOWLEDGE_BASE.game_model.non_negotiables or []
+    plan = plan_generator.generate(
+        analysis=report,
+        spfc_principles=principles,
+    )
+    return _render(
+        request,
+        "game_plan.html",
+        {"plan": plan, "demo_notice": True},
+    )
+
+
+# ---------------------------------------------------------------------------
 # Rotas JSON (API) — Fase 2
 # ---------------------------------------------------------------------------
 
@@ -301,3 +414,63 @@ async def api_squad_gaps() -> JSONResponse:
             "moderate": sum(1 for g in report.gap_analysis if g.gap_severity == "moderate"),
         }
     )
+
+
+# ---------------------------------------------------------------------------
+# Rotas JSON (API) — Fase 4: Opponent Preparation
+# ---------------------------------------------------------------------------
+
+@app.get("/api/opponents", response_class=JSONResponse, summary="API — Lista de Adversários (JSON)")
+async def api_opponents() -> JSONResponse:
+    """Retorna a lista de adversários analisados em formato JSON."""
+    raw_opponents = build_demo_opponents()
+    items = []
+    for opp in raw_opponents:
+        report = opp_analyzer.analyze(opp["profile"], opp["name"])
+        items.append({
+            "opponent_id": report.opponent_id,
+            "opponent_name": report.opponent_name,
+            "overall_threat_level": report.overall_threat_level,
+            "pressing_intensity": report.pressing_analysis.intensity,
+            "data_completeness": report.data_completeness,
+            "source_matches_count": report.source_matches_count,
+            "alerts_count": len(report.tactical_alerts),
+            "zone_vulnerabilities_count": len(report.zone_vulnerabilities),
+        })
+    return JSONResponse(content={"opponents": items, "total": len(items)})
+
+
+@app.get("/api/opponents/{opponent_id}", response_class=JSONResponse, summary="API — Análise de Adversário (JSON)")
+async def api_opponent_detail(opponent_id: str) -> JSONResponse:
+    """Retorna a análise completa de um adversário em formato JSON."""
+    opp = get_demo_opponent_by_id(opponent_id)
+    if opp is None:
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "error": "Adversário não encontrado",
+                "opponent_id": opponent_id,
+                "action": "Verifique o ID na lista de adversários.",
+            },
+        )
+    report = opp_analyzer.analyze(opp["profile"], opp["name"])
+    return JSONResponse(content=report.to_dict())
+
+
+@app.get("/api/opponents/{opponent_id}/plan", response_class=JSONResponse, summary="API — Plano de Jogo (JSON)")
+async def api_opponent_plan(opponent_id: str) -> JSONResponse:
+    """Retorna o plano de jogo pré-partida de um adversário em formato JSON."""
+    opp = get_demo_opponent_by_id(opponent_id)
+    if opp is None:
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "error": "Adversário não encontrado",
+                "opponent_id": opponent_id,
+                "action": "Verifique o ID na lista de adversários.",
+            },
+        )
+    report = opp_analyzer.analyze(opp["profile"], opp["name"])
+    principles = SPFC_KNOWLEDGE_BASE.game_model.non_negotiables or []
+    plan = plan_generator.generate(analysis=report, spfc_principles=principles)
+    return JSONResponse(content=plan.to_dict())

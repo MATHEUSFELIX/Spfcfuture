@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}{{ opponent_name }} — Análise de Adversário{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">
+    <a href="/opponents">Adversários</a> &rsaquo; {{ opponent_name }}
+  </div>
+  <h1>{{ opponent_name }}</h1>
+  <p class="subtitle">{{ description }}</p>
+  <div class="header-badges">
+    <span class="badge badge-threat-{{ report.overall_threat_level }}">
+      Ameaça: {{ report.overall_threat_level | upper }}
+    </span>
+    <span class="badge badge-neutral">
+      Análise: {{ report.analysis_date }}
+    </span>
+    <span class="badge badge-neutral">
+      {{ report.source_matches_count }} partida(s) analisada(s)
+    </span>
+    <span class="badge badge-neutral">
+      Completude: {{ (report.data_completeness * 100) | int }}%
+    </span>
+  </div>
+</div>
+
+{% if demo_notice %}
+<div class="alert alert-info">
+  <strong>Dados de Demonstração:</strong> Este perfil é uma fixture fictícia criada para demonstração do sistema.
+  Nenhum dado representa análise real de qualquer clube.
+</div>
+{% endif %}
+
+<!-- Avaliação Geral -->
+<section class="section">
+  <h2>Avaliação Geral</h2>
+  <div class="assessment-box">
+    <p>{{ report.overall_assessment }}</p>
+  </div>
+
+  {% if report.key_observations %}
+  <h3>Observações-Chave</h3>
+  <ul class="observations-list">
+    {% for obs in report.key_observations %}
+    <li>{{ obs }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+<!-- Alertas Táticos -->
+{% if report.tactical_alerts %}
+<section class="section">
+  <h2>Alertas Táticos</h2>
+  <div class="alerts-list">
+    {% for alert in report.tactical_alerts %}
+    <div class="alert-card severity-{{ alert.severity }}">
+      <div class="alert-header">
+        <span class="badge badge-alert-{{ alert.severity }}">{{ alert.severity | upper }}</span>
+        <span class="badge badge-category">{{ alert.category }}</span>
+        <strong>{{ alert.title }}</strong>
+      </div>
+      <p>{{ alert.description }}</p>
+      {% if alert.action_required %}
+      <div class="action-required">
+        <strong>Ação Recomendada:</strong> {{ alert.action_required }}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Análise de Pressing -->
+<section class="section">
+  <h2>Análise de Pressing</h2>
+  <div class="analysis-grid">
+    <div class="analysis-card">
+      <div class="analysis-label">Intensidade</div>
+      <div class="analysis-value pressing-{{ report.pressing_analysis.intensity }}">
+        {{ report.pressing_analysis.intensity | upper }}
+      </div>
+    </div>
+    <div class="analysis-card">
+      <div class="analysis-label">Linha Defensiva</div>
+      <div class="analysis-value">{{ report.pressing_analysis.defensive_line | upper }}</div>
+    </div>
+    <div class="analysis-card">
+      <div class="analysis-label">Compacidade</div>
+      <div class="analysis-value">{{ report.pressing_analysis.compactness }}</div>
+    </div>
+    <div class="analysis-card">
+      <div class="analysis-label">Velocidade de Recuperação</div>
+      <div class="analysis-value">{{ report.pressing_analysis.recovery_speed }}</div>
+    </div>
+  </div>
+
+  {% if report.pressing_analysis.explanation %}
+  <div class="explanation-box">
+    <strong>Explicação:</strong> {{ report.pressing_analysis.explanation }}
+  </div>
+  {% endif %}
+
+  {% if report.pressing_analysis.vulnerability_to_buildup %}
+  <div class="recommendation-box">
+    <strong>Vulnerabilidade ao Jogo de Construção:</strong>
+    {{ report.pressing_analysis.vulnerability_to_buildup }}
+  </div>
+  {% endif %}
+
+  {% if report.pressing_analysis.trigger_zones %}
+  <div class="tags-row">
+    <strong>Zonas de Ativação:</strong>
+    {% for zone in report.pressing_analysis.trigger_zones %}
+    <span class="tag">{{ zone }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="confidence-bar-wrap">
+    <span>Confiança: {{ (report.pressing_analysis.confidence * 100) | int }}%</span>
+    <div class="confidence-bar">
+      <div class="confidence-fill" style="width: {{ (report.pressing_analysis.confidence * 100) | int }}%"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Vulnerabilidades de Zona -->
+<section class="section">
+  <h2>Vulnerabilidades por Zona</h2>
+  {% if report.zone_vulnerabilities %}
+  <div class="zones-grid">
+    {% for zone in report.zone_vulnerabilities %}
+    <div class="zone-card severity-{{ zone.severity }}">
+      <div class="zone-header">
+        <span class="zone-corridor-badge corridor-{{ zone.corridor }}">
+          {{ zone.corridor | upper }}
+        </span>
+        <span class="badge badge-severity-{{ zone.severity }}">{{ zone.severity | upper }}</span>
+      </div>
+      <p class="zone-description">{{ zone.description }}</p>
+      {% if zone.exploitation_method %}
+      <div class="exploitation-box">
+        <strong>Como Explorar:</strong> {{ zone.exploitation_method }}
+      </div>
+      {% endif %}
+      <div class="confidence-bar-wrap small">
+        <span>Confiança: {{ (zone.confidence * 100) | int }}%</span>
+        <div class="confidence-bar">
+          <div class="confidence-fill" style="width: {{ (zone.confidence * 100) | int }}%"></div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>Nenhuma vulnerabilidade de zona identificada nos dados disponíveis.</p>
+  </div>
+  {% endif %}
+</section>
+
+<!-- Vulnerabilidades em Transição -->
+<section class="section">
+  <h2>Vulnerabilidades em Transição</h2>
+  {% if report.transition_vulnerabilities %}
+  <div class="transitions-list">
+    {% for tv in report.transition_vulnerabilities %}
+    <div class="transition-card severity-{{ tv.severity }}">
+      <div class="transition-header">
+        <span class="badge badge-type">{{ tv.type | replace('_', ' ') | title }}</span>
+        <span class="badge badge-severity-{{ tv.severity }}">{{ tv.severity | upper }}</span>
+      </div>
+      <p>{{ tv.description }}</p>
+      {% if tv.trigger %}
+      <div class="meta-row"><strong>Gatilho:</strong> {{ tv.trigger }}</div>
+      {% endif %}
+      {% if tv.exploitation_window %}
+      <div class="meta-row"><strong>Janela de Exploração:</strong> {{ tv.exploitation_window }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>Nenhuma vulnerabilidade em transição identificada nos dados disponíveis.</p>
+  </div>
+  {% endif %}
+</section>
+
+<!-- Bola Parada -->
+<section class="section">
+  <h2>Bola Parada</h2>
+  <div class="set-piece-grid">
+    {% if report.set_piece_analysis.offensive_threats %}
+    <div class="set-piece-card">
+      <h3>Ameaças Ofensivas</h3>
+      <ul>
+        {% for threat in report.set_piece_analysis.offensive_threats %}
+        <li>{{ threat }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    {% if report.set_piece_analysis.defensive_weaknesses %}
+    <div class="set-piece-card highlight">
+      <h3>Fraquezas Defensivas</h3>
+      <ul>
+        {% for weakness in report.set_piece_analysis.defensive_weaknesses %}
+        <li>{{ weakness }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if report.set_piece_analysis.key_takers_assessment %}
+  <div class="recommendation-box">
+    <strong>Cobradores:</strong> {{ report.set_piece_analysis.key_takers_assessment }}
+  </div>
+  {% endif %}
+
+  {% if report.set_piece_analysis.key_targets_assessment %}
+  <div class="recommendation-box">
+    <strong>Alvos:</strong> {{ report.set_piece_analysis.key_targets_assessment }}
+  </div>
+  {% endif %}
+
+  {% if report.set_piece_analysis.recommended_defensive_setup %}
+  <div class="recommendation-box">
+    <strong>Configuração Defensiva Recomendada:</strong>
+    {{ report.set_piece_analysis.recommended_defensive_setup }}
+  </div>
+  {% endif %}
+
+  {% if report.set_piece_analysis.recommended_offensive_approach %}
+  <div class="recommendation-box">
+    <strong>Abordagem Ofensiva Recomendada:</strong>
+    {{ report.set_piece_analysis.recommended_offensive_approach }}
+  </div>
+  {% endif %}
+
+  <div class="confidence-bar-wrap">
+    <span>Confiança na Análise de Bola Parada: {{ (report.set_piece_analysis.confidence * 100) | int }}%</span>
+    <div class="confidence-bar">
+      <div class="confidence-fill" style="width: {{ (report.set_piece_analysis.confidence * 100) | int }}%"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Ações -->
+<div class="page-actions">
+  <a href="/opponents/{{ report.opponent_id }}/plan" class="btn btn-primary btn-large">
+    Gerar Plano de Jogo
+  </a>
+  <a href="/opponents" class="btn btn-secondary">
+    Voltar para Adversários
+  </a>
+</div>
+{% endblock %}

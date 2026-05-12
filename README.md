@@ -73,6 +73,12 @@ pytest
 | `/api/knowledge-base` | Base de Conhecimento em JSON |
 | `/api/squad` | Análise de Elenco em JSON |
 | `/api/squad/gaps` | Lacunas do elenco em JSON |
+| `/opponents` | Lista de adversários e nível de ameaça |
+| `/opponents/{id}` | Detalhe de adversário (pressing, vulnerabilidades, bola parada) |
+| `/opponents/{id}/plan` | Plano de jogo pré-partida gerado para o adversário |
+| `/api/opponents` | Lista de adversários em JSON |
+| `/api/opponents/{id}` | Análise de adversário em JSON |
+| `/api/opponents/{id}/plan` | Plano de jogo pré-partida em JSON |
 
 ---
 
@@ -92,6 +98,10 @@ Spfcfuture/
 │   ├── squad_intelligence/
 │   │   ├── squad_analyzer.py  # Analisador de elenco, profundidade e gaps
 │   │   └── squad_fixtures.py  # Dados de demonstração de elenco
+│   ├── opponent_prep/
+│   │   ├── opponent_analyzer.py # Analisador de pressing e vulnerabilidades
+│   │   ├── game_plan.py         # Gerador de plano de jogo pré-partida
+│   │   └── opponent_fixtures.py # Dados de demonstração de adversários
 │   ├── web/
 │   │   ├── local_app.py       # Web App FastAPI
 │   │   ├── templates/         # Templates Jinja2
@@ -102,6 +112,9 @@ Spfcfuture/
 │   │   │   ├── test_health.html
 │   │   │   ├── knowledge_base.html
 │   │   │   ├── squad.html
+│   │   │   ├── opponents.html
+│   │   │   ├── opponent_detail.html
+│   │   │   ├── game_plan.html
 │   │   │   └── error.html
 │   │   └── static/css/
 │   │       └── style.css      # Estilos SPFC (vermelho, preto, branco)
@@ -118,9 +131,14 @@ Spfcfuture/
 │   ├── squad_intelligence/
 │   │   ├── test_squad_analyzer.py # Testes do analisador de elenco
 │   │   └── test_squad_fixtures.py # Testes das fixtures de elenco
+│   ├── opponent_prep/
+│   │   ├── test_opponent_analyzer.py # Testes do analisador de adversários
+│   │   ├── test_game_plan.py         # Testes do gerador de plano de jogo
+│   │   └── test_opponent_fixtures.py # Testes das fixtures de adversários
 │   ├── web/
 │   │   ├── test_routes.py         # Testes de integração das rotas da Fase 1
-│   │   └── test_phase2_routes.py  # Testes de integração das rotas da Fase 2
+│   │   ├── test_phase2_routes.py  # Testes de integração das rotas da Fase 2
+│   │   └── test_phase4_routes.py  # Testes de integração das rotas da Fase 4
 │   └── cli/
 │       └── test_cli.py            # Testes do CLI
 ├── TEST_EXPLAINABILITY.md     # Explicação completa das categorias de testes
@@ -136,7 +154,7 @@ Spfcfuture/
 | Módulo | Descrição | Status |
 |---|---|---|
 | Local Web App | Interface web local para análise, revisão e feedback | **Ativo** |
-| Match Intelligence | Análise de jogos, adversários, padrões e riscos | Planejado |
+| Match Intelligence / Opponent Prep | Análise de adversários, pressing, vulnerabilidades e plano de jogo | **Ativo** |
 | Tactical Simulator | Simulação de lances, branches, xT e controle de espaço | Planejado |
 | Squad Intelligence | Elenco, profundidade, lacunas e desenvolvimento | **Ativo** |
 | Scouting & Market Fit | Jogadores-alvo por encaixe tático, custo e risco | Planejado |
@@ -161,7 +179,7 @@ Para entender o que cada categoria de testes valida e por que importa, consulte 
 ### Resultado atual
 
 ```
-331 passed, 0 failed
+526 passed, 0 failed
 ```
 
 ---
@@ -198,7 +216,7 @@ O sistema é regido por 10 princípios inegociáveis:
 | 1 | Local Web App + Test Explainability | **Concluído** |
 | 2 | Base São Paulo: knowledge base e modelo de jogo | **Concluído** |
 | 3 | Squad Intelligence: elenco, papéis e lacunas | **Concluído** |
-| 4 | Opponent Preparation: adversário e plano pré-jogo | Planejado |
+| 4 | Opponent Preparation: adversário e plano pré-jogo | **Concluído** |
 | 5 | Scouting & Market Fit: contratações por encaixe | Planejado |
 | 6 | Set Piece Lab: bola parada | Planejado |
 | 7 | Matchday Assistant: pré-jogo, intervalo, pós-jogo | Planejado |
