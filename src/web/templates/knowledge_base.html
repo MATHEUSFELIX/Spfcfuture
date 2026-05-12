@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Base de Conhecimento — {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &rsaquo; Base de Conhecimento
+  </div>
+  <h1>Base de Conhecimento SPFC</h1>
+  <p class="page-subtitle">Identidade do clube, modelo de jogo e princípios táticos de referência.</p>
+  <div class="notice notice-info">
+    <strong>Nota:</strong> Esta é a base de conhecimento estrutural do clube.
+    Dados específicos de temporada (elenco, adversários, resultados) devem ser
+    adicionados pelo analista com dados reais verificados.
+  </div>
+</div>
+
+{# Identidade do Clube #}
+<section class="card">
+  <h2>Identidade do Clube</h2>
+  <div class="info-grid">
+    <div class="info-item">
+      <span class="info-label">Clube</span>
+      <span class="info-value">{{ kb.identity.club_name }}</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Fundação</span>
+      <span class="info-value">{{ kb.identity.founded }}</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Temporada Atual</span>
+      <span class="info-value">{{ kb.identity.current_season }}</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Competição</span>
+      <span class="info-value">{{ kb.identity.current_competition }}</span>
+    </div>
+  </div>
+  <div class="info-block">
+    <h3>Títulos</h3>
+    <p>{{ kb.identity.titles_summary }}</p>
+  </div>
+  <div class="info-block">
+    <h3>Herança Tática</h3>
+    <p>{{ kb.identity.tactical_heritage }}</p>
+  </div>
+</section>
+
+{# Modelo de Jogo #}
+<section class="card">
+  <h2>Modelo de Jogo</h2>
+  <div class="info-grid">
+    <div class="info-item">
+      <span class="info-label">Nome</span>
+      <span class="info-value">{{ kb.game_model.name }}</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Formação de Referência</span>
+      <span class="info-value formation-badge">{{ kb.game_model.preferred_formation }}</span>
+    </div>
+  </div>
+
+  <div class="info-block">
+    <h3>Palavras-chave do Estilo</h3>
+    <div class="tag-list">
+      {% for kw in kb.game_model.style_keywords %}
+        <span class="tag tag-style">{{ kw }}</span>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="info-block">
+    <h3>Princípios Inegociáveis</h3>
+    <ul class="principle-list">
+      {% for p in kb.game_model.non_negotiables %}
+        <li>{{ p }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <h3>Fases do Jogo</h3>
+  <div class="phases-grid">
+    {% for phase in kb.game_model.phases %}
+    <div class="phase-card">
+      <h4 class="phase-title">{{ phase.name }}</h4>
+      <div class="phase-section">
+        <strong>Princípios</strong>
+        <ul>
+          {% for p in phase.principles %}
+            <li>{{ p }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="phase-section">
+        <strong>Tarefas</strong>
+        <ul>
+          {% for t in phase.tasks %}
+            <li>{{ t }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% if phase.key_metrics %}
+      <div class="phase-section">
+        <strong>Métricas-chave</strong>
+        <div class="tag-list">
+          {% for m in phase.key_metrics %}
+            <span class="tag tag-metric">{{ m }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if kb.game_model.notes %}
+  <div class="notice notice-warning">
+    <strong>Nota:</strong> {{ kb.game_model.notes }}
+  </div>
+  {% endif %}
+</section>
+
+{# Princípios Táticos #}
+<section class="card">
+  <h2>Princípios Táticos</h2>
+  <p>{{ kb.tactical_principles | length }} princípios registrados.</p>
+
+  {# Agrupar por categoria #}
+  {% set categories = kb.tactical_principles | map(attribute='category') | unique | list %}
+  {% for category in categories %}
+    <h3 class="category-title">{{ category | replace('_', ' ') | title }}</h3>
+    <div class="principles-list">
+      {% for principle in kb.tactical_principles if principle.category == category %}
+      <div class="principle-item">
+        <div class="principle-header">
+          <span class="principle-id">{{ principle.id }}</span>
+          <span class="principle-description">{{ principle.description }}</span>
+        </div>
+        <div class="principle-body">
+          <div class="principle-rationale">
+            <strong>Justificativa:</strong> {{ principle.rationale }}
+          </div>
+          {% if principle.observable_indicators %}
+          <div class="principle-indicators">
+            <strong>Indicadores observáveis:</strong>
+            <ul>
+              {% for ind in principle.observable_indicators %}
+                <li>{{ ind }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+</section>
+
+<div class="page-actions">
+  <a href="/squad" class="btn btn-primary">Ver Análise de Elenco &rarr;</a>
+  <a href="/api/knowledge-base" class="btn btn-secondary">Ver JSON</a>
+</div>
+{% endblock %}

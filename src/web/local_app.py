@@ -1,7 +1,8 @@
 """
 Local Web App — SPFC Champion Decision OS.
 
-Interface web local para visualização de runs, healthcheck e catálogo de testes.
+Interface web local para visualização de runs, healthcheck, catálogo de testes,
+base de conhecimento SPFC e análise de elenco.
 
 Princípio arquitetural: UI não contém lógica tática.
 Princípio de UX: Não mostrar stack trace cru — mostrar erro, causa provável,
@@ -24,12 +25,15 @@ from fastapi.templating import Jinja2Templates
 
 from src.core.artifact_store import ArtifactStore
 from src.core.test_catalog import get_catalog
+from src.spfc_base.knowledge_base import SPFC_KNOWLEDGE_BASE
+from src.squad_intelligence.squad_analyzer import SquadAnalyzer
+from src.squad_intelligence.squad_fixtures import build_demo_squad
 
 # ---------------------------------------------------------------------------
 # Configuração do App
 # ---------------------------------------------------------------------------
 
-APP_VERSION = "0.1.0"
+APP_VERSION = "0.2.0"
 APP_TITLE = "SPFC Champion Decision OS"
 APP_DESCRIPTION = "Sistema de Apoio a Decisões Esportivas do São Paulo FC"
 
@@ -50,6 +54,7 @@ app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
 templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
 store = ArtifactStore()
+analyzer = SquadAnalyzer()
 
 
 # ---------------------------------------------------------------------------
@@ -87,7 +92,7 @@ def _render(
 
 
 # ---------------------------------------------------------------------------
-# Rotas HTML
+# Rotas HTML — Fase 1
 # ---------------------------------------------------------------------------
 
 @app.get("/", response_class=HTMLResponse, summary="Home — Página inicial")
@@ -142,7 +147,41 @@ async def test_health(request: Request) -> HTMLResponse:
 
 
 # ---------------------------------------------------------------------------
-# Rotas JSON (API)
+# Rotas HTML — Fase 2: Base SPFC e Squad Intelligence
+# ---------------------------------------------------------------------------
+
+@app.get("/knowledge-base", response_class=HTMLResponse, summary="Base de Conhecimento SPFC")
+async def knowledge_base(request: Request) -> HTMLResponse:
+    """
+    Exibe a base de conhecimento do São Paulo FC: identidade do clube,
+    modelo de jogo desejado e princípios táticos de referência.
+    """
+    return _render(request, "knowledge_base.html", {"kb": SPFC_KNOWLEDGE_BASE})
+
+
+@app.get("/squad", response_class=HTMLResponse, summary="Análise de Elenco")
+async def squad(request: Request) -> HTMLResponse:
+    """
+    Exibe a análise do elenco: profundidade por posição, lacunas táticas,
+    dependências de jogadores e curva etária.
+
+    Utiliza elenco de demonstração (dados fictícios).
+    """
+    players = build_demo_squad()
+    report = analyzer.analyze(
+        players=players,
+        team_id="spfc-demo",
+        season="2025 (Demo)",
+    )
+    return _render(
+        request,
+        "squad.html",
+        {"players": players, "report": report},
+    )
+
+
+# ---------------------------------------------------------------------------
+# Rotas JSON (API) — Fase 1
 # ---------------------------------------------------------------------------
 
 @app.get("/health", response_class=JSONResponse, summary="Healthcheck da aplicação")
@@ -217,5 +256,48 @@ async def api_test_catalog() -> JSONResponse:
                 }
                 for cat in catalog
             ]
+        }
+    )
+
+
+# ---------------------------------------------------------------------------
+# Rotas JSON (API) — Fase 2
+# ---------------------------------------------------------------------------
+
+@app.get("/api/knowledge-base", response_class=JSONResponse, summary="API — Base de Conhecimento (JSON)")
+async def api_knowledge_base() -> JSONResponse:
+    """Retorna a base de conhecimento do SPFC em formato JSON."""
+    return JSONResponse(content=SPFC_KNOWLEDGE_BASE.to_dict())
+
+
+@app.get("/api/squad", response_class=JSONResponse, summary="API — Análise de Elenco (JSON)")
+async def api_squad() -> JSONResponse:
+    """Retorna a análise do elenco de demonstração em formato JSON."""
+    players = build_demo_squad()
+    report = analyzer.analyze(
+        players=players,
+        team_id="spfc-demo",
+        season="2025 (Demo)",
+    )
+    return JSONResponse(
+        content={
+            "players": [p.to_dict() for p in players],
+            "report": report.to_dict(),
+        }
+    )
+
+
+@app.get("/api/squad/gaps", response_class=JSONResponse, summary="API — Lacunas do Elenco (JSON)")
+async def api_squad_gaps() -> JSONResponse:
+    """Retorna apenas as lacunas identificadas no elenco de demonstração."""
+    players = build_demo_squad()
+    report = analyzer.analyze(players=players, team_id="spfc-demo", season="2025 (Demo)")
+    gaps = [g.to_dict() for g in report.gap_analysis if g.gap_severity != "none"]
+    return JSONResponse(
+        content={
+            "gaps": gaps,
+            "total_gaps": len(gaps),
+            "critical": sum(1 for g in report.gap_analysis if g.gap_severity == "critical"),
+            "moderate": sum(1 for g in report.gap_analysis if g.gap_severity == "moderate"),
         }
     )

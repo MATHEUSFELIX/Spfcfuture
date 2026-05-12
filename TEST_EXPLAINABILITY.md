@@ -16,6 +16,8 @@ Esta categoria valida que os modelos de domínio possuem validação correta, se
 *   `test_run_summary_serialization`: Garante que `RunSummary` serializa e desserializa corretamente via métodos `to_dict` e `from_dict`.
 *   `test_run_summary_defaults`: Garante que `RunSummary` tem defaults seguros e não aceita status inválido.
 *   `test_run_detail_structure`: Garante que `RunDetail` contém todos os campos obrigatórios.
+*   `test_knowledge_base_structure`: Garante que a Base de Conhecimento do clube possui as 4 fases do jogo e princípios táticos estruturados.
+*   `test_squad_analyzer_gaps`: Garante que o analisador de elenco identifica lacunas críticas quando faltam jogadores para papéis táticos essenciais.
 
 ## 2. Pipeline
 
@@ -81,6 +83,7 @@ A rastreabilidade total é um princípio fundamental do SPFC Champion Decision O
 
 **Exemplos de testes:**
 *   `test_audit_log_created`: Garante que cada execução (run) do pipeline gera uma entrada imutável no log de auditoria.
+*   `test_decision_memory_persistence`: Garante que as decisões tomadas, resultados observados e feedbacks humanos são salvos permanentemente no repositório de memória.
 
 ## 9. API and CLI
 
@@ -93,6 +96,8 @@ A API e o CLI são as interfaces primárias de integração do sistema. Contrato
 *   `test_home_page_renders`: Garante que a página inicial renderiza o HTML corretamente sem erros.
 *   `test_run_detail_404_for_unknown`: Garante que a requisição de um `run_id` inexistente retorna status 404 com uma mensagem amigável ao usuário.
 *   `test_cli_app_command_exists`: Garante que o comando `football-os app` está registrado corretamente no grupo do CLI.
+*   `test_knowledge_base_returns_html`: Garante que a rota `/knowledge-base` renderiza os princípios do clube.
+*   `test_api_squad_gaps`: Garante que a API `/api/squad/gaps` retorna JSON válido com a contagem correta de lacunas no elenco.
 
 ## 10. Pilot Evaluation
 

@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Análise de Elenco — {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &rsaquo; Análise de Elenco
+  </div>
+  <h1>Análise de Elenco</h1>
+  <p class="page-subtitle">Profundidade por posição, lacunas táticas e curva etária.</p>
+  <div class="notice notice-warning">
+    <strong>Dados de demonstração:</strong> Este elenco é fictício e serve apenas para
+    demonstrar o funcionamento do sistema. Todos os jogadores são marcados como
+    <span class="tag tag-fixture">fixture</span>.
+  </div>
+</div>
+
+{# Resumo Geral #}
+<section class="card">
+  <h2>Resumo do Elenco</h2>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-value">{{ report.total_players }}</span>
+      <span class="stat-label">Total de Jogadores</span>
+    </div>
+    <div class="stat-card stat-ok">
+      <span class="stat-value">{{ report.available_players }}</span>
+      <span class="stat-label">Disponíveis</span>
+    </div>
+    <div class="stat-card stat-warn">
+      <span class="stat-value">{{ report.unavailable_players }}</span>
+      <span class="stat-label">Indisponíveis</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ (report.data_completeness * 100) | int }}%</span>
+      <span class="stat-label">Completude dos Dados</span>
+    </div>
+  </div>
+
+  <div class="assessment-block">
+    <strong>Avaliação Geral:</strong> {{ report.overall_assessment }}
+  </div>
+
+  {% if report.notes %}
+  <div class="notice notice-info">{{ report.notes }}</div>
+  {% endif %}
+</section>
+
+{# Lacunas Táticas #}
+<section class="card">
+  <h2>Análise de Lacunas por Papel Tático</h2>
+  {% set critical_gaps = report.gap_analysis | selectattr('gap_severity', 'equalto', 'critical') | list %}
+  {% set moderate_gaps = report.gap_analysis | selectattr('gap_severity', 'equalto', 'moderate') | list %}
+
+  {% if critical_gaps %}
+  <div class="notice notice-error">
+    <strong>{{ critical_gaps | length }} lacuna(s) crítica(s) identificada(s).</strong>
+    Ação imediata necessária.
+  </div>
+  {% endif %}
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Papel Tático</th>
+        <th>Total no Elenco</th>
+        <th>Disponíveis</th>
+        <th>Mínimo</th>
+        <th>Severidade</th>
+        <th>Explicação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for gap in report.gap_analysis %}
+      <tr class="gap-row gap-{{ gap.gap_severity }}">
+        <td><strong>{{ gap.role_name }}</strong></td>
+        <td>{{ gap.current_count }}</td>
+        <td>{{ gap.available_count }}</td>
+        <td>{{ gap.minimum_required }}</td>
+        <td>
+          {% if gap.gap_severity == 'critical' %}
+            <span class="badge badge-failed">Crítico</span>
+          {% elif gap.gap_severity == 'moderate' %}
+            <span class="badge badge-running">Moderado</span>
+          {% elif gap.gap_severity == 'minor' %}
+            <span class="badge badge-pending">Menor</span>
+          {% else %}
+            <span class="badge badge-completed">OK</span>
+          {% endif %}
+        </td>
+        <td class="gap-explanation">{{ gap.explanation }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{# Recomendações #}
+{% if report.recommendations %}
+<section class="card">
+  <h2>Recomendações</h2>
+  <div class="notice notice-info">
+    <strong>Inferência do sistema:</strong> As recomendações abaixo são geradas
+    automaticamente com base na análise de lacunas. A decisão final é sempre humana.
+  </div>
+  <ul class="recommendation-list">
+    {% for rec in report.recommendations %}
+      <li>{{ rec }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{# Dependências Críticas #}
+{% if report.key_dependencies %}
+<section class="card">
+  <h2>Dependências de Jogadores</h2>
+  <div class="notice notice-warning">
+    Os jogadores abaixo são os únicos disponíveis para seus respectivos papéis.
+    Uma lesão ou suspensão criaria lacuna crítica imediata.
+  </div>
+  <ul class="dependency-list">
+    {% for dep in report.key_dependencies %}
+      <li>{{ dep }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{# Curva Etária #}
+<section class="card">
+  <h2>Curva Etária</h2>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-value">{{ report.age_curve.u23_count }}</span>
+      <span class="stat-label">Sub-23</span>
+    </div>
+    <div class="stat-card stat-ok">
+      <span class="stat-value">{{ report.age_curve.prime_count }}</span>
+      <span class="stat-label">Prime (23–29)</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ report.age_curve.experienced_count }}</span>
+      <span class="stat-label">Experientes (30+)</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">
+        {% if report.age_curve.average_age %}{{ report.age_curve.average_age }}{% else %}—{% endif %}
+      </span>
+      <span class="stat-label">Média de Idade</span>
+    </div>
+  </div>
+  {% if report.age_curve.notes %}
+  <div class="notice notice-warning">{{ report.age_curve.notes }}</div>
+  {% endif %}
+</section>
+
+{# Profundidade por Posição #}
+<section class="card">
+  <h2>Profundidade por Posição</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Posição</th>
+        <th>Disponíveis</th>
+        <th>Status</th>
+        <th>Observação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for depth in report.depth_by_position %}
+      <tr>
+        <td><strong>{{ depth.position }}</strong></td>
+        <td>{{ depth.depth_count }}</td>
+        <td>
+          {% if depth.has_gap %}
+            <span class="badge badge-failed">Lacuna</span>
+          {% else %}
+            <span class="badge badge-completed">OK</span>
+          {% endif %}
+        </td>
+        <td>{{ depth.gap_reason if depth.has_gap else '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{# Lista de Jogadores #}
+<section class="card">
+  <h2>Elenco Completo (Demo)</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Idade</th>
+        <th>Posições</th>
+        <th>Pé</th>
+        <th>Disponibilidade</th>
+        <th>Notas</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for player in players %}
+      <tr>
+        <td>{{ player.name }}</td>
+        <td>{{ player.age if player.age else '—' }}</td>
+        <td>
+          {% for pos in player.positions %}
+            <span class="tag tag-position">{{ pos }}</span>
+          {% endfor %}
+        </td>
+        <td>{{ player.preferred_foot.value }}</td>
+        <td>
+          {% if player.availability_status.value == 'available' %}
+            <span class="badge badge-completed">Disponível</span>
+          {% elif player.availability_status.value == 'injured' %}
+            <span class="badge badge-failed">Lesionado</span>
+          {% elif player.availability_status.value == 'suspended' %}
+            <span class="badge badge-failed">Suspenso</span>
+          {% elif player.availability_status.value == 'doubtful' %}
+            <span class="badge badge-running">Dúvida</span>
+          {% else %}
+            <span class="badge badge-pending">{{ player.availability_status.value }}</span>
+          {% endif %}
+        </td>
+        <td class="notes-cell">{{ player.notes }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<div class="page-actions">
+  <a href="/knowledge-base" class="btn btn-secondary">&larr; Base de Conhecimento</a>
+  <a href="/api/squad" class="btn btn-secondary">Ver JSON</a>
+</div>
+{% endblock %}

@@ -68,6 +68,11 @@ pytest
 | `/api/runs` | Lista de runs em JSON |
 | `/api/runs/{run_id}` | Detalhe de run em JSON |
 | `/api/test-catalog` | Catálogo de testes em JSON |
+| `/knowledge-base` | Base de Conhecimento do clube e modelo de jogo |
+| `/squad` | Análise de Elenco, profundidade e lacunas |
+| `/api/knowledge-base` | Base de Conhecimento em JSON |
+| `/api/squad` | Análise de Elenco em JSON |
+| `/api/squad/gaps` | Lacunas do elenco em JSON |
 
 ---
 
@@ -77,9 +82,16 @@ pytest
 Spfcfuture/
 ├── src/
 │   ├── core/
-│   │   ├── models.py          # Modelos de domínio (RunSummary, RunDetail, etc.)
+│   │   ├── models.py          # Modelos de domínio da Fase 1
+│   │   ├── football_models.py # Modelos de domínio do futebol (Team, Player, Match)
 │   │   ├── artifact_store.py  # Carregador de artefatos de runs
 │   │   └── test_catalog.py    # Catálogo de categorias de testes
+│   ├── spfc_base/
+│   │   ├── knowledge_base.py  # Identidade, modelo de jogo e princípios
+│   │   └── decision_memory.py # Repositório de memória de decisões
+│   ├── squad_intelligence/
+│   │   ├── squad_analyzer.py  # Analisador de elenco, profundidade e gaps
+│   │   └── squad_fixtures.py  # Dados de demonstração de elenco
 │   ├── web/
 │   │   ├── local_app.py       # Web App FastAPI
 │   │   ├── templates/         # Templates Jinja2
@@ -88,6 +100,8 @@ Spfcfuture/
 │   │   │   ├── runs.html
 │   │   │   ├── run_detail.html
 │   │   │   ├── test_health.html
+│   │   │   ├── knowledge_base.html
+│   │   │   ├── squad.html
 │   │   │   └── error.html
 │   │   └── static/css/
 │   │       └── style.css      # Estilos SPFC (vermelho, preto, branco)
@@ -98,8 +112,15 @@ Spfcfuture/
 │   │   ├── test_models.py         # Testes de domain models
 │   │   ├── test_artifact_store.py # Testes do pipeline/artifact store
 │   │   └── test_test_catalog.py   # Testes do catálogo de testes
+│   ├── spfc_base/
+│   │   ├── test_knowledge_base.py # Testes da base de conhecimento
+│   │   └── test_decision_memory.py# Testes da memória de decisões
+│   ├── squad_intelligence/
+│   │   ├── test_squad_analyzer.py # Testes do analisador de elenco
+│   │   └── test_squad_fixtures.py # Testes das fixtures de elenco
 │   ├── web/
-│   │   └── test_routes.py         # Testes de integração das rotas web
+│   │   ├── test_routes.py         # Testes de integração das rotas da Fase 1
+│   │   └── test_phase2_routes.py  # Testes de integração das rotas da Fase 2
 │   └── cli/
 │       └── test_cli.py            # Testes do CLI
 ├── TEST_EXPLAINABILITY.md     # Explicação completa das categorias de testes
@@ -117,7 +138,7 @@ Spfcfuture/
 | Local Web App | Interface web local para análise, revisão e feedback | **Ativo** |
 | Match Intelligence | Análise de jogos, adversários, padrões e riscos | Planejado |
 | Tactical Simulator | Simulação de lances, branches, xT e controle de espaço | Planejado |
-| Squad Intelligence | Elenco, profundidade, lacunas e desenvolvimento | Planejado |
+| Squad Intelligence | Elenco, profundidade, lacunas e desenvolvimento | **Ativo** |
 | Scouting & Market Fit | Jogadores-alvo por encaixe tático, custo e risco | Planejado |
 | Set Piece Lab | Bola parada ofensiva e defensiva | Planejado |
 | Matchday Assistant | Pré-jogo, intervalo e pós-jogo | Planejado |
@@ -140,7 +161,7 @@ Para entender o que cada categoria de testes valida e por que importa, consulte 
 ### Resultado atual
 
 ```
-161 passed, 0 failed
+331 passed, 0 failed
 ```
 
 ---
@@ -175,8 +196,8 @@ O sistema é regido por 10 princípios inegociáveis:
 | Fase | Entrega | Status |
 |---|---|---|
 | 1 | Local Web App + Test Explainability | **Concluído** |
-| 2 | Base São Paulo: knowledge base e modelo de jogo | Planejado |
-| 3 | Squad Intelligence: elenco, papéis e lacunas | Planejado |
+| 2 | Base São Paulo: knowledge base e modelo de jogo | **Concluído** |
+| 3 | Squad Intelligence: elenco, papéis e lacunas | **Concluído** |
 | 4 | Opponent Preparation: adversário e plano pré-jogo | Planejado |
 | 5 | Scouting & Market Fit: contratações por encaixe | Planejado |
 | 6 | Set Piece Lab: bola parada | Planejado |

@@ -614,3 +614,278 @@ a:hover { text-decoration: underline; }
 /* Utilities */
 .text-muted { color: var(--text-muted); }
 code { font-family: var(--font-mono); font-size: 0.875em; background: var(--bg-secondary); padding: 0.1em 0.35em; border-radius: 3px; }
+
+/* ============================================================
+   Phase 2 — Base SPFC & Squad Intelligence Styles
+   ============================================================ */
+
+/* Badge aliases for gap analysis */
+.badge-completed { background: #0d2e1a; color: #4caf50; }
+.badge-running   { background: #2e2000; color: #ffc107; }
+.badge-pending   { background: #1a1a2e; color: #7986cb; }
+.badge-failed    { background: #2e0d0d; color: #ef5350; }
+
+/* Notices */
+.notice {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    margin: 1rem 0;
+    font-size: 0.875rem;
+    border-left: 3px solid;
+}
+.notice-info    { background: #0d1a2e; border-color: #4a90d9; color: #a8c8f0; }
+.notice-warning { background: #2e2000; border-color: #ffc107; color: #ffe082; }
+.notice-error   { background: #2e0d0d; border-color: #ef5350; color: #ffcdd2; }
+.notice-success { background: #0d2e1a; border-color: #4caf50; color: #c8e6c9; }
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+}
+
+.info-label {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.info-block {
+    margin: 1.25rem 0;
+}
+
+.info-block h3 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+/* Formation Badge */
+.formation-badge {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    color: var(--spfc-red-light);
+    font-weight: 700;
+}
+
+/* Tag variants */
+.tag-style    { background: #1a2a1a; color: #81c784; border-color: #2a4a2a; }
+.tag-metric   { background: #1a1a2e; color: #7986cb; border-color: #2a2a4a; }
+.tag-position { background: #2e1a00; color: #ffb74d; border-color: #4a2a00; }
+.tag-fixture  { background: #2e1a2e; color: #ce93d8; border-color: #4a2a4a; }
+
+/* Tag list */
+.tag-list { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.5rem; }
+
+/* Phases Grid */
+.phases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.phase-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 1rem;
+}
+
+.phase-title {
+    font-size: 0.95rem;
+    color: var(--spfc-red-light);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.phase-section {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.phase-section ul {
+    margin-top: 0.35rem;
+    padding-left: 1.25rem;
+    color: var(--text-secondary);
+}
+
+.phase-section li { margin-bottom: 0.2rem; }
+
+/* Principles List */
+.category-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0.75rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.principles-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.principle-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.principle-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.principle-id {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.principle-description {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.principle-body {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.principle-rationale { margin-bottom: 0.5rem; }
+
+.principle-indicators ul {
+    margin-top: 0.35rem;
+    padding-left: 1.25rem;
+}
+
+.principle-indicators li { margin-bottom: 0.2rem; }
+
+/* Principle list (non-negotiables) */
+.principle-list {
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+.principle-list li { margin-bottom: 0.4rem; }
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+}
+
+.stat-card.stat-ok  { border-color: #2a4a2a; }
+.stat-card.stat-warn { border-color: #4a3a00; }
+
+.stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--spfc-red-light);
+    line-height: 1;
+    margin-bottom: 0.35rem;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+/* Assessment block */
+.assessment-block {
+    background: var(--bg-secondary);
+    border-left: 3px solid var(--spfc-red);
+    padding: 0.75rem 1rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Gap rows */
+.gap-row.gap-critical { background: rgba(46, 13, 13, 0.3); }
+.gap-row.gap-moderate { background: rgba(46, 32, 0, 0.2); }
+.gap-explanation { font-size: 0.82rem; color: var(--text-secondary); }
+
+/* Recommendation list */
+.recommendation-list {
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+.recommendation-list li { margin-bottom: 0.5rem; }
+
+/* Dependency list */
+.dependency-list {
+    padding-left: 1.5rem;
+    color: #ffe082;
+    font-size: 0.9rem;
+}
+.dependency-list li { margin-bottom: 0.35rem; }
+
+/* Notes cell */
+.notes-cell {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-style: italic;
+    max-width: 200px;
+}
+
+/* Page actions */
+.page-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Page subtitle */
+.page-subtitle {
+    color: var(--text-secondary);
+    margin-top: 0.35rem;
+    font-size: 0.95rem;
+}
