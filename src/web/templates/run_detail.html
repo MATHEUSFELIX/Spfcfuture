@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Run {{ detail.summary.run_id[:8] }} — {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="breadcrumb">
+        <a href="/runs">Runs</a> &rsaquo; Detalhe
+    </div>
+    <h1 class="page-title">{{ detail.summary.name }}</h1>
+    <div class="run-meta">
+        <span class="badge badge-status-{{ detail.summary.status.value }}">{{ detail.summary.status.value }}</span>
+        <span class="badge badge-module">{{ detail.summary.module }}</span>
+        <span class="badge badge-confidence-{{ detail.summary.confidence.value }}">
+            Confiança: {{ detail.summary.confidence.value }}
+        </span>
+    </div>
+</div>
+
+<div class="detail-grid">
+    <!-- Coluna principal -->
+    <div class="detail-main">
+
+        <!-- Explicação -->
+        <section class="detail-section">
+            <h2 class="section-title">Explicação</h2>
+            {% if detail.explanation %}
+            <div class="explanation-box">
+                <p>{{ detail.explanation }}</p>
+            </div>
+            {% else %}
+            <p class="text-muted">Nenhuma explicação disponível para esta run.</p>
+            {% endif %}
+        </section>
+
+        <!-- Recomendações -->
+        <section class="detail-section">
+            <h2 class="section-title">Recomendações</h2>
+            {% if detail.recommendations %}
+            <ul class="recommendation-list">
+                {% for rec in detail.recommendations %}
+                <li class="recommendation-item">{{ rec }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted">Nenhuma recomendação gerada.</p>
+            {% endif %}
+        </section>
+
+        <!-- Riscos -->
+        <section class="detail-section">
+            <h2 class="section-title">Riscos Identificados</h2>
+            {% if detail.risks %}
+            <ul class="risk-list">
+                {% for risk in detail.risks %}
+                <li class="risk-item">{{ risk }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted">Nenhum risco identificado.</p>
+            {% endif %}
+        </section>
+
+        <!-- Próximas Ações -->
+        {% if detail.next_actions %}
+        <section class="detail-section">
+            <h2 class="section-title">Próximas Ações</h2>
+            <ul class="next-actions-list">
+                {% for action in detail.next_actions %}
+                <li>{{ action }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        <!-- Feedback Humano -->
+        <section class="detail-section">
+            <h2 class="section-title">Feedback Humano</h2>
+            {% if detail.human_feedback %}
+            <div class="feedback-box">
+                <p>{{ detail.human_feedback }}</p>
+            </div>
+            {% else %}
+            <p class="text-muted">Nenhum feedback registrado para esta run.</p>
+            {% endif %}
+        </section>
+
+    </div>
+
+    <!-- Coluna lateral -->
+    <aside class="detail-sidebar">
+
+        <!-- Metadados -->
+        <section class="sidebar-section">
+            <h3 class="sidebar-title">Metadados</h3>
+            <dl class="metadata-list">
+                <dt>Run ID</dt>
+                <dd><code>{{ detail.summary.run_id }}</code></dd>
+
+                <dt>Módulo</dt>
+                <dd>{{ detail.summary.module }}</dd>
+
+                <dt>Status</dt>
+                <dd><span class="badge badge-status-{{ detail.summary.status.value }}">{{ detail.summary.status.value }}</span></dd>
+
+                <dt>Confiança</dt>
+                <dd><span class="badge badge-confidence-{{ detail.summary.confidence.value }}">{{ detail.summary.confidence.value }}</span></dd>
+
+                <dt>Criado em</dt>
+                <dd>{{ detail.summary.created_at.strftime('%d/%m/%Y %H:%M:%S') }}</dd>
+
+                {% if detail.summary.completed_at %}
+                <dt>Concluído em</dt>
+                <dd>{{ detail.summary.completed_at.strftime('%d/%m/%Y %H:%M:%S') }}</dd>
+                {% endif %}
+
+                {% if detail.summary.tags %}
+                <dt>Tags</dt>
+                <dd>
+                    {% for tag in detail.summary.tags %}
+                    <span class="tag">{{ tag }}</span>
+                    {% endfor %}
+                </dd>
+                {% endif %}
+            </dl>
+        </section>
+
+        <!-- Inputs -->
+        {% if detail.inputs %}
+        <section class="sidebar-section">
+            <h3 class="sidebar-title">Inputs</h3>
+            <pre class="code-block">{{ detail.inputs | tojson(indent=2) }}</pre>
+        </section>
+        {% endif %}
+
+        <!-- Outputs -->
+        {% if detail.outputs %}
+        <section class="sidebar-section">
+            <h3 class="sidebar-title">Outputs</h3>
+            <pre class="code-block">{{ detail.outputs | tojson(indent=2) }}</pre>
+        </section>
+        {% endif %}
+
+        <!-- Links da API -->
+        <section class="sidebar-section">
+            <h3 class="sidebar-title">API</h3>
+            <a href="/api/runs/{{ detail.summary.run_id }}" class="btn btn-sm btn-secondary" target="_blank">
+                Ver JSON desta Run
+            </a>
+        </section>
+
+    </aside>
+</div>
+
+<div class="page-actions">
+    <a href="/runs" class="btn btn-secondary">&larr; Voltar para Runs</a>
+</div>
+{% endblock %}

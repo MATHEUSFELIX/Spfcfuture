@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Home — {{ app_title }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">SPFC Champion Decision OS</h1>
+        <p class="hero-subtitle">
+            Sistema de apoio a decisões esportivas do São Paulo FC.
+            Análise baseada em evidências, explicabilidade obrigatória,
+            decisão final sempre humana.
+        </p>
+        <div class="hero-actions">
+            <a href="/runs" class="btn btn-primary">Ver Runs</a>
+            <a href="/test-health" class="btn btn-secondary">Test Health</a>
+        </div>
+    </div>
+</section>
+
+<section class="modules-section">
+    <h2 class="section-title">Módulos do Sistema</h2>
+    <div class="modules-grid">
+        <div class="module-card">
+            <div class="module-icon">🔍</div>
+            <h3>Match Intelligence</h3>
+            <p>Análise de jogos, adversários, padrões e riscos táticos.</p>
+            <span class="module-status planned">Planejado</span>
+        </div>
+        <div class="module-card">
+            <div class="module-icon">🧩</div>
+            <h3>Tactical Simulator</h3>
+            <p>Simulação de lances, branches, xT e controle de espaço.</p>
+            <span class="module-status planned">Planejado</span>
+        </div>
+        <div class="module-card">
+            <div class="module-icon">👥</div>
+            <h3>Squad Intelligence</h3>
+            <p>Elenco, profundidade, lacunas, papéis e desenvolvimento.</p>
+            <span class="module-status planned">Planejado</span>
+        </div>
+        <div class="module-card">
+            <div class="module-icon">🎯</div>
+            <h3>Scouting &amp; Market Fit</h3>
+            <p>Jogadores-alvo por encaixe tático, custo e risco.</p>
+            <span class="module-status planned">Planejado</span>
+        </div>
+        <div class="module-card">
+            <div class="module-icon">⚡</div>
+            <h3>Set Piece Lab</h3>
+            <p>Bola parada ofensiva e defensiva.</p>
+            <span class="module-status planned">Planejado</span>
+        </div>
+        <div class="module-card">
+            <div class="module-icon">📋</div>
+            <h3>Matchday Assistant</h3>
+            <p>Pré-jogo, intervalo e pós-jogo.</p>
+            <span class="module-status planned">Planejado</span>
+        </div>
+        <div class="module-card">
+            <div class="module-icon">📊</div>
+            <h3>Board Dashboard</h3>
+            <p>Visão executiva de investimento, risco e impacto.</p>
+            <span class="module-status planned">Planejado</span>
+        </div>
+        <div class="module-card">
+            <div class="module-icon">🌐</div>
+            <h3>Local Web App</h3>
+            <p>Interface web local para análise, revisão e feedback.</p>
+            <span class="module-status active">Ativo</span>
+        </div>
+    </div>
+</section>
+
+{% if runs %}
+<section class="recent-runs-section">
+    <h2 class="section-title">Runs Recentes</h2>
+    <div class="runs-table-wrap">
+        <table class="runs-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Módulo</th>
+                    <th>Status</th>
+                    <th>Confiança</th>
+                    <th>Data</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for run in runs %}
+                <tr>
+                    <td class="run-name">{{ run.name }}</td>
+                    <td><span class="badge badge-module">{{ run.module }}</span></td>
+                    <td><span class="badge badge-status-{{ run.status.value }}">{{ run.status.value }}</span></td>
+                    <td><span class="badge badge-confidence-{{ run.confidence.value }}">{{ run.confidence.value }}</span></td>
+                    <td class="run-date">{{ run.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td><a href="/runs/{{ run.run_id }}" class="btn btn-sm">Ver</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="section-footer">
+        <a href="/runs" class="btn btn-secondary">Ver todas as runs</a>
+    </div>
+</section>
+{% endif %}
+
+<section class="principles-section">
+    <h2 class="section-title">Princípios do Sistema</h2>
+    <div class="principles-grid">
+        <div class="principle-card">
+            <span class="principle-num">1</span>
+            <p>Assistente, não oráculo.</p>
+        </div>
+        <div class="principle-card">
+            <span class="principle-num">2</span>
+            <p>Evidência acima de narrativa.</p>
+        </div>
+        <div class="principle-card">
+            <span class="principle-num">3</span>
+            <p>Não inventar dados.</p>
+        </div>
+        <div class="principle-card">
+            <span class="principle-num">4</span>
+            <p>Separar fato, inferência e recomendação.</p>
+        </div>
+        <div class="principle-card">
+            <span class="principle-num">5</span>
+            <p>Testes antes de avançar.</p>
+        </div>
+        <div class="principle-card">
+            <span class="principle-num">6</span>
+            <p>Explicabilidade obrigatória.</p>
+        </div>
+        <div class="principle-card">
+            <span class="principle-num">7</span>
+            <p>Simulações são cenários, não certezas.</p>
+        </div>
+        <div class="principle-card">
+            <span class="principle-num">8</span>
+            <p>Decisão final é humana.</p>
+        </div>
+        <div class="principle-card">
+            <span class="principle-num">9</span>
+            <p>Rastreabilidade total.</p>
+        </div>
+        <div class="principle-card">
+            <span class="principle-num">10</span>
+            <p>Produto usável por analistas, comissão e diretoria.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Test Health — {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Test Health — Catálogo de Testes</h1>
+    <p class="page-subtitle">
+        Explicação completa das categorias de testes do sistema.
+        Para cada categoria: o que valida, por que importa, exemplos e status atual.
+    </p>
+</div>
+
+<div class="catalog-summary">
+    <div class="summary-stat">
+        <span class="stat-num">{{ catalog | length }}</span>
+        <span class="stat-label">Categorias</span>
+    </div>
+    <div class="summary-stat">
+        <span class="stat-num">{{ catalog | selectattr('status', 'equalto', 'active') | list | length }}</span>
+        <span class="stat-label">Ativas</span>
+    </div>
+    <div class="summary-stat">
+        <span class="stat-num">{{ catalog | selectattr('status', 'equalto', 'partial') | list | length }}</span>
+        <span class="stat-label">Parciais</span>
+    </div>
+    <div class="summary-stat">
+        <span class="stat-num">{{ catalog | selectattr('status', 'equalto', 'planned') | list | length }}</span>
+        <span class="stat-label">Planejadas</span>
+    </div>
+</div>
+
+<div class="catalog-list">
+    {% for cat in catalog %}
+    <div class="catalog-card" id="{{ cat.id }}">
+        <div class="catalog-card-header">
+            <h2 class="catalog-card-title">{{ cat.title }}</h2>
+            <span class="badge {{ cat.status_css_class }}">{{ cat.status_label }}</span>
+        </div>
+
+        <div class="catalog-card-body">
+            <div class="catalog-section">
+                <h3>O que valida</h3>
+                <p>{{ cat.what_it_validates }}</p>
+            </div>
+
+            <div class="catalog-section">
+                <h3>Por que importa</h3>
+                <p>{{ cat.why_it_matters }}</p>
+            </div>
+
+            {% if cat.examples %}
+            <div class="catalog-section">
+                <h3>Exemplos de Testes</h3>
+                <div class="examples-list">
+                    {% for ex in cat.examples %}
+                    <div class="example-item">
+                        <div class="example-name"><code>{{ ex.name }}</code></div>
+                        <div class="example-desc">{{ ex.description }}</div>
+                        {% if ex.file_hint %}
+                        <div class="example-file">
+                            <span class="file-label">Arquivo:</span>
+                            <code>{{ ex.file_hint }}</code>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="page-actions">
+    <a href="/api/test-catalog" class="btn btn-secondary" target="_blank">Ver Catálogo em JSON</a>
+</div>
+{% endblock %}

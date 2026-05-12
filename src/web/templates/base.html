@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ app_title }}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-brand">
+                <span class="brand-icon">⚽</span>
+                <div class="brand-text">
+                    <a href="/" class="brand-name">{{ app_title }}</a>
+                    <span class="brand-sub">São Paulo FC — Decision OS</span>
+                </div>
+            </div>
+            <nav class="site-nav">
+                <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">Home</a>
+                <a href="/runs" class="nav-link {% if request.url.path.startswith('/runs') %}active{% endif %}">Runs</a>
+                <a href="/test-health" class="nav-link {% if request.url.path == '/test-health' %}active{% endif %}">Test Health</a>
+                <a href="/health" class="nav-link" target="_blank">Healthcheck</a>
+                <a href="/api/docs" class="nav-link" target="_blank">API Docs</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>
+                <strong>{{ app_title }}</strong> v{{ app_version }} &mdash;
+                Sistema de Apoio a Decisões Esportivas &mdash;
+                Decisão final é sempre humana.
+            </p>
+            <p class="footer-note">
+                Este sistema não promete títulos. Ele melhora a qualidade das decisões.
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
